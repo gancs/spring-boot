@@ -93,6 +93,7 @@ public class ConfigurationWarningsApplicationContextInitializer
 			for (Check check : this.checks) {
 				String message = check.getWarning(registry);
 				if (StringUtils.hasLength(message)) {
+					//输出警告信息
 					warn(message);
 				}
 			}

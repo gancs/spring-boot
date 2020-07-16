@@ -161,8 +161,8 @@ import org.springframework.web.context.support.StandardServletEnvironment;
 public class SpringApplication {
 
 	/**
-	 * The class name of application context that will be used by default for non-web
-	 * environments.
+	 * 应用程序上下文的类名，默认用于非web环境 The class name of application context that will be used by
+	 * default for non-web environments.
 	 */
 	public static final String DEFAULT_CONTEXT_CLASS = "org.springframework.context."
 			+ "annotation.AnnotationConfigApplicationContext";
@@ -268,9 +268,23 @@ public class SpringApplication {
 		this.resourceLoader = resourceLoader;
 		Assert.notNull(primarySources, "PrimarySources must not be null");
 		this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
+		/**
+		 *判断运行环境 none、servlet、reactive
+		 */
 		this.webApplicationType = WebApplicationType.deduceFromClasspath();
+		/**
+		 * 加载 spring-boot/META-INF/spring.factories
+		 * spring-boot-autoconfigure/META-INF/spring.factories
+		 * spring-beans/META-INF/spring.factories
+		 * 的内容并缓存，并实例化org.springframework.context.ApplicationContextInitializer相关的配置的类
+		 */
 		setInitializers((Collection) getSpringFactoriesInstances(ApplicationContextInitializer.class));
+
+		/**
+		 * 实例化org.springframework.context.ApplicationListener相关配置的类
+		 */
 		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
+
 		this.mainApplicationClass = deduceMainApplicationClass();
 	}
 
@@ -296,11 +310,15 @@ public class SpringApplication {
 	 * @return a running {@link ApplicationContext}
 	 */
 	public ConfigurableApplicationContext run(String... args) {
+		// spring boot 运行计时器
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
 		ConfigurableApplicationContext context = null;
 		Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
+
+		// 配置java.awt.headless
 		configureHeadlessProperty();
+
 		SpringApplicationRunListeners listeners = getRunListeners(args);
 		listeners.starting();
 		try {
@@ -412,6 +430,7 @@ public class SpringApplication {
 
 	private SpringApplicationRunListeners getRunListeners(String[] args) {
 		Class<?>[] types = new Class<?>[] { SpringApplication.class, String[].class };
+		// 初始化日志、SpringApplicationRunListener列表
 		return new SpringApplicationRunListeners(logger,
 				getSpringFactoriesInstances(SpringApplicationRunListener.class, types, this, args));
 	}
@@ -423,8 +442,20 @@ public class SpringApplication {
 	private <T> Collection<T> getSpringFactoriesInstances(Class<T> type, Class<?>[] parameterTypes, Object... args) {
 		ClassLoader classLoader = getClassLoader();
 		// Use names and ensure unique to protect against duplicates
+		// 使用名称并确保惟一以防止重复
+		/**
+		 * 第一次执行(构造方法里的setInitializers()调用) spring-boot/META-INF/spring.factories
+		 * spring-boot-autoconfigure/META-INF/spring.factories
+		 * spring-beans/META-INF/spring.factories
+		 * 的内容缓存，并只获取org.springframework.context.ApplicationContextInitializer相关的配置
+		 */
 		Set<String> names = new LinkedHashSet<>(SpringFactoriesLoader.loadFactoryNames(type, classLoader));
+
+		// 实例化org.springframework.context.ApplicationContextInitializer相关配置的类
+		// 并放入List容器
 		List<T> instances = createSpringFactoriesInstances(type, parameterTypes, classLoader, args, names);
+
+		// 排序？
 		AnnotationAwareOrderComparator.sort(instances);
 		return instances;
 	}
@@ -435,10 +466,15 @@ public class SpringApplication {
 		List<T> instances = new ArrayList<>(names.size());
 		for (String name : names) {
 			try {
+				// 加载类
 				Class<?> instanceClass = ClassUtils.forName(name, classLoader);
+				// 父--子关系、实现关系判断
 				Assert.isAssignable(type, instanceClass);
+				// 返回所有构造器, 包括private的
 				Constructor<?> constructor = instanceClass.getDeclaredConstructor(parameterTypes);
+				// 根据构造器和参数实例化对象
 				T instance = (T) BeanUtils.instantiateClass(constructor, args);
+				// 添加到List容器中
 				instances.add(instance);
 			}
 			catch (Throwable ex) {
