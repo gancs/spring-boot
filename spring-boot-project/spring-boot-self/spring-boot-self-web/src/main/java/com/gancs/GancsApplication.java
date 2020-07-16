@@ -10,4 +10,5 @@ public class GancsApplication {
 		SpringApplication.run(GancsApplication.class, args);
 	}
 
+
 }

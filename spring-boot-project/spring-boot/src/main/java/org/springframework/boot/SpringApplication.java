@@ -317,6 +317,7 @@ public class SpringApplication {
 		Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
 
 		// 配置java.awt.headless
+		//java.awt.headless是J2SE的一种模式，用于在缺失显示屏、鼠标或者键盘时的系统配置。对于后端服务来讲，很多都是需要将这个属性设置为true的
 		configureHeadlessProperty();
 
 		SpringApplicationRunListeners listeners = getRunListeners(args);
@@ -448,6 +449,8 @@ public class SpringApplication {
 		 * spring-boot-autoconfigure/META-INF/spring.factories
 		 * spring-beans/META-INF/spring.factories
 		 * 的内容缓存，并只获取org.springframework.context.ApplicationContextInitializer相关的配置
+		 *
+		 * 根据type为key加载所有spring.factories文件中的配置
 		 */
 		Set<String> names = new LinkedHashSet<>(SpringFactoriesLoader.loadFactoryNames(type, classLoader));
 
