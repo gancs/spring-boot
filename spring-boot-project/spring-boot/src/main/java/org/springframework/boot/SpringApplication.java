@@ -285,6 +285,7 @@ public class SpringApplication {
 		 */
 		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
 
+		//获取启动应用的主类
 		this.mainApplicationClass = deduceMainApplicationClass();
 	}
 
@@ -320,13 +321,32 @@ public class SpringApplication {
 		//java.awt.headless是J2SE的一种模式，用于在缺失显示屏、鼠标或者键盘时的系统配置。对于后端服务来讲，很多都是需要将这个属性设置为true的
 		configureHeadlessProperty();
 
+		//加载spring.factories 中org.springframework.boot.SpringApplicationRunListener 的配置
 		SpringApplicationRunListeners listeners = getRunListeners(args);
 		listeners.starting();
 		try {
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
+			//加载
+			//命令行参数。
+			//Servlet初始参数
+			//ServletContext初始化参数
+			//JVM系统属性
+			//操作系统环境变量
+			//随机生成的带random.*前缀的属性
+			//应用程序以外的application.yml或者appliaction.properties文件
+			//classpath:/config/application.yml或者classpath:/config/application.properties
+			//通过@PropertySource标注的属性源
+			//默认属性
 			ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
+
+			//读取配置spring.beaninfo.ignore=false/true, 并设置.
+			//beaninfo是对反射的封装,相当于使用反射的一个工具类, beaninfo有可能有性能问题 ？？
 			configureIgnoreBeanInfo(environment);
+
+			//打印banner(判断是否打印(CONSOLE、LOG、OFF))
 			Banner printedBanner = printBanner(environment);
+
+			//根据this.webApplicationType(none, servlet, reactive)来初始化ConfigurableApplicationContext
 			context = createApplicationContext();
 			exceptionReporters = getSpringFactoriesInstances(SpringBootExceptionReporter.class,
 					new Class[] { ConfigurableApplicationContext.class }, context);
@@ -358,6 +378,17 @@ public class SpringApplication {
 	private ConfigurableEnvironment prepareEnvironment(SpringApplicationRunListeners listeners,
 			ApplicationArguments applicationArguments) {
 		// Create and configure the environment
+		//加载操作系统和一些配置的属性
+		//命令行参数。
+		//Servlet初始参数
+		//ServletContext初始化参数
+		//JVM系统属性
+		//操作系统环境变量
+		//随机生成的带random.*前缀的属性
+		//应用程序以外的application.yml或者appliaction.properties文件
+		//classpath:/config/application.yml或者classpath:/config/application.properties
+		//通过@PropertySource标注的属性源
+		//默认属性
 		ConfigurableEnvironment environment = getOrCreateEnvironment();
 		configureEnvironment(environment, applicationArguments.getSourceArgs());
 		ConfigurationPropertySources.attach(environment);
@@ -385,9 +416,16 @@ public class SpringApplication {
 	private void prepareContext(ConfigurableApplicationContext context, ConfigurableEnvironment environment,
 			SpringApplicationRunListeners listeners, ApplicationArguments applicationArguments, Banner printedBanner) {
 		context.setEnvironment(environment);
+
+		//设置beanFactory
 		postProcessApplicationContext(context);
+
+		//在刷新之前调用实现了ApplicationContextInitializer的类的initialize方法
 		applyInitializers(context);
+
+		//调用实现了SpringApplicationRunListener的类的contextPrepared方法
 		listeners.contextPrepared(context);
+
 		if (this.logStartupInfo) {
 			logStartupInfo(context.getParent() == null);
 			logStartupProfileInfo(context);
