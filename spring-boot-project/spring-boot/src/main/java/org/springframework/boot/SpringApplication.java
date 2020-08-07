@@ -351,13 +351,19 @@ public class SpringApplication {
 			exceptionReporters = getSpringFactoriesInstances(SpringBootExceptionReporter.class,
 					new Class[] { ConfigurableApplicationContext.class }, context);
 			prepareContext(context, environment, listeners, applicationArguments, printedBanner);
+
+			//调用spring的依赖注入等等
 			refreshContext(context);
+
 			afterRefresh(context, applicationArguments);
+
 			stopWatch.stop();
 			if (this.logStartupInfo) {
 				new StartupInfoLogger(this.mainApplicationClass).logStarted(getApplicationLog(), stopWatch);
 			}
+
 			listeners.started(context);
+
 			callRunners(context, applicationArguments);
 		}
 		catch (Throwable ex) {
@@ -390,8 +396,12 @@ public class SpringApplication {
 		//通过@PropertySource标注的属性源
 		//默认属性
 		ConfigurableEnvironment environment = getOrCreateEnvironment();
+
+		//加载命令行参数、spring.profiles.active
 		configureEnvironment(environment, applicationArguments.getSourceArgs());
 		ConfigurationPropertySources.attach(environment);
+
+		//广播事件
 		listeners.environmentPrepared(environment);
 		bindToSpringApplication(environment);
 		if (!this.isCustomEnvironment) {
@@ -436,6 +446,7 @@ public class SpringApplication {
 		if (printedBanner != null) {
 			beanFactory.registerSingleton("springBootBanner", printedBanner);
 		}
+		//设置同名bean是否可以被覆盖
 		if (beanFactory instanceof DefaultListableBeanFactory) {
 			((DefaultListableBeanFactory) beanFactory)
 					.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
@@ -555,7 +566,9 @@ public class SpringApplication {
 			ConversionService conversionService = ApplicationConversionService.getSharedInstance();
 			environment.setConversionService((ConfigurableConversionService) conversionService);
 		}
+		//加载命令行参数
 		configurePropertySources(environment, args);
+		//additionalProfiles-->spring.profiles.active
 		configureProfiles(environment, args);
 	}
 
@@ -765,6 +778,7 @@ public class SpringApplication {
 		if (this.environment != null) {
 			loader.setEnvironment(this.environment);
 		}
+		//注册含main方法的类
 		loader.load();
 	}
 

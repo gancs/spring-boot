@@ -1,0 +1,9 @@
+
+xiaofang:
+  url: http://www.zkcloud.net/login
+  username: xf_query
+  password: xf_query_45@91
+
+#spring:
+#  jmx:
+#    enabled: true #暴露jmx

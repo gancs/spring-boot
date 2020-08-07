@@ -1,0 +1,9 @@
+${AnsiColor.BRIGHT_RED}
+   ,--.   ,--.
+   \  /-~-\  /
+    )' a a `(
+   (  ,---.  )
+    `(_o_o_)'
+      )`-'(
+
+Spring Boot${spring-boot.formatted-version}

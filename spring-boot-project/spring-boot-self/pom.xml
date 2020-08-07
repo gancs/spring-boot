@@ -28,6 +28,25 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<!--将mybatis的xml文件打包进target-->
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>*.yml</include>
+					<include>*.txt</include>  <!--将banner.txt 编译进target-->
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources/resources</directory>
+			</resource>
+		</resources>
 	</build>
 
 
